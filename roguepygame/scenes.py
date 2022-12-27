@@ -12,8 +12,11 @@ class MainMenu(root.Scene):
 
     def __init__(self, **kwargs):
         super(MainMenu, self).__init__(**kwargs)
-        ui.Button("New game", (const.WIDTH // 2, const.HEIGHT // 4),
-                  self.start_game_button_click)
+        ui.Button(
+            "New game",
+            (const.WIDTH // 2, const.HEIGHT // 4),
+            self.start_game_button_click,
+        )
 
     def update(self) -> None:
         self.program.get_object_manager().object_update()
@@ -34,14 +37,17 @@ class GameScene(root.Scene):
     """
     Game Scene
     """
+
     def __init__(self, **kwargs):
         super(GameScene, self).__init__(**kwargs)
-        ui.Text('Game', (const.WIDTH // 2, const.HEIGHT // 2), 48)
+        ui.Text("Game", (const.WIDTH // 2, const.HEIGHT // 2), 48)
         self.timer = root.Timer(1000, self.spawn_unit).create_object()
-        self.counter = ui.Text('', (const.WIDTH // 2, const.HEIGHT // 2 + 50), 48)
+        self.counter = ui.Text("", (const.WIDTH // 2, const.HEIGHT // 2 + 50), 48)
 
     def update(self):
-        self.counter.update_text(f'Objects on screen: {len(self.program.get_object_manager().objects)}')
+        self.counter.update_text(
+            f"Objects on screen: {len(self.program.get_object_manager().objects)}"
+        )
         self.program.get_object_manager().object_update()
 
     def render(self, screen):

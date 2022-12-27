@@ -2,10 +2,13 @@ from typing import Optional, Type, Any, Callable, TYPE_CHECKING, Protocol
 
 import pygame
 import constants as const
+
 if TYPE_CHECKING:
     import game
+
     class SupportsEvents(Protocol):
-        def events(self, event: pygame.event.Event) -> None: ...
+        def events(self, event: pygame.event.Event) -> None:
+            ...
 
 
 class Scene:
@@ -13,11 +16,10 @@ class Scene:
     Class used to represent the game scene
     it is responsible for processing the events, updating the game state, and rendering the game
     """
+
     def __init__(self, **kwargs):
         self.program: game.Game = const.program
-        self.state: dict[str, Any] = {
-            'mouse_pos': (-1000, -1000)
-        }
+        self.state: dict[str, Any] = {"mouse_pos": (-1000, -1000)}
 
     def start(self) -> None:
         """
@@ -46,7 +48,9 @@ class Scene:
         Every Scene must implement it.
         :return: None
         """
-        raise NotImplementedError(f"{self.__class__.__name__} Scene must implement update method!")
+        raise NotImplementedError(
+            f"{self.__class__.__name__} Scene must implement update method!"
+        )
 
     def render(self, screen: pygame.Surface) -> None:
         """
@@ -57,7 +61,9 @@ class Scene:
         :param screen: Game window
         :return: None
         """
-        raise NotImplementedError(f"{self.__class__.__name__} Scene must implement render method!")
+        raise NotImplementedError(
+            f"{self.__class__.__name__} Scene must implement render method!"
+        )
 
     def end(self) -> None:
         """
@@ -71,7 +77,7 @@ class Scene:
         Method that updates the state of the program
         :return: None
         """
-        self.state['mouse_pos'] = pygame.mouse.get_pos()
+        self.state["mouse_pos"] = pygame.mouse.get_pos()
 
 
 class SceneManager:
@@ -81,6 +87,7 @@ class SceneManager:
     Also contains the ObjectManager for the game.
     This object shouldn't be initialised, but rather called from the Game class.
     """
+
     def __init__(self):
         self.program: game.Game = const.program
         self.scene: Optional[Scene] = None
@@ -109,6 +116,7 @@ class ObjectManager:
     It gives the ability to iterate over all objects and call important methods.
     You shouldn't create the instance of this object, but rather use the object already created in the Game class.
     """
+
     def __init__(self):
         self.program: game.Game = const.program
         self.objects: list[GameObject] = []
@@ -148,7 +156,7 @@ class ObjectManager:
         :return: None
         """
         self.objects.append(obj)
-        self.objects.sort(key=lambda x: x.layer if hasattr(x, 'layer') else 0)
+        self.objects.sort(key=lambda x: x.layer if hasattr(x, "layer") else 0)
 
     def remove_object(self, obj: "GameObject") -> None:
         """
@@ -173,6 +181,7 @@ class EventManager:
     """
     Class used to transport pygame Events to GameObjects
     """
+
     def __init__(self):
         self.listeners: dict[int, list[SupportsEvents]] = {}
 
@@ -226,12 +235,15 @@ class GameObject:
     """
     Class used to represent the basic game object
     """
+
     def __init__(self):
         self.program: game.Game = const.program
         self.name: Optional[str] = None
         self.child_objects: dict[str, GameObject] = {}
 
-    def add_child(self, child_obj: "GameObject", child_name: Optional[str] = None) -> None:
+    def add_child(
+        self, child_obj: "GameObject", child_name: Optional[str] = None
+    ) -> None:
         """
         Method that creates the child of the GameObject
         :param child_obj: child object
@@ -273,7 +285,9 @@ class DrawableObject(GameObject):
     Requires image and rect attributes
     """
 
-    def __init__(self, image: pygame.Surface = None, rect: pygame.Rect = None, layer: int = 1):
+    def __init__(
+        self, image: pygame.Surface = None, rect: pygame.Rect = None, layer: int = 1
+    ):
         super(DrawableObject, self).__init__()
         self.image = image
         self.rect = rect
@@ -293,6 +307,7 @@ class ClickableObject(DrawableObject):
     Drawable object that can be clicked
     Must implement click_function()
     """
+
     def __init__(self):
         super(ClickableObject, self).__init__()
         self.program.get_event_manager().subscribe(pygame.MOUSEBUTTONDOWN, self)
@@ -304,7 +319,7 @@ class ClickableObject(DrawableObject):
         :return: None
         """
         if event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_position = self.program.get_scene().state['mouse_pos']
+            mouse_position = self.program.get_scene().state["mouse_pos"]
             if self.rect.collidepoint(mouse_position):
                 if event.button == 1:
                     self.click_function()
@@ -316,7 +331,9 @@ class ClickableObject(DrawableObject):
         Function that gets called when the object is clicked with the left mouse button
         :return: None
         """
-        raise NotImplementedError(f"{self.__class__.__name__} ClickableObject must implement click_function method!")
+        raise NotImplementedError(
+            f"{self.__class__.__name__} ClickableObject must implement click_function method!"
+        )
 
     def click_function_right(self):
         """
@@ -330,7 +347,15 @@ class Timer(GameObject):
     """
     Class used for timer
     """
-    def __init__(self, countdown: int, do: Callable, start: bool = True, loop: bool = True, first_check: bool = False):
+
+    def __init__(
+        self,
+        countdown: int,
+        do: Callable,
+        start: bool = True,
+        loop: bool = True,
+        first_check: bool = False,
+    ):
         super(Timer, self).__init__()
         self.countdown: int = countdown
         self.current_time: int = 0
@@ -365,7 +390,10 @@ class Timer(GameObject):
         """
         if self.running:
             self.current_time = pygame.time.get_ticks()
-            if self.current_time - self.last_update >= self.countdown or not self.first_check:
+            if (
+                self.current_time - self.last_update >= self.countdown
+                or not self.first_check
+            ):
                 self.first_check = True
                 self.last_update = self.current_time
                 self.do()
